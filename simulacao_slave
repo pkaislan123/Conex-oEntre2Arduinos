@@ -1,0 +1,50 @@
+#include <SoftwareSerial.h>
+
+/*
+ * 
+ * 
+ * Autor: Aislan Silva Costa
+ * Data: 20/10/2021
+ * 
+ * Objetico: O código a seguir tem por objetivo receber dados de uma conexao serial com outro arduino 
+ * e repassar para a serial.
+ * 
+ * os pinos rx/tx nativos do arduino uno estão conectados ao rx/tx de outro arduino.
+ * Com a biblioteca SoftwareSerial criamos uma outra conexao rx/tx virtual e dela conectamos ao computador(necessário 
+ * conversor ttl->usb para a conversão dos dados)
+ * 
+ * 
+ * 
+ */
+SoftwareSerial master(5, 6); //instancia a conexão serial virtual para conectar ao computador
+
+void setup() {
+  Serial.begin(9600); //inicia a serial nativa a velocidade de 9600 
+  master.begin(9600); //inicia a serial virtual a velocidade de 9600 
+  master.println("Iniciando..."); //imprime a mensagem "Iniciando..." na serial virtual(conectado ao pc)
+  delay(1000); //atrazo a execução das rotinas em 1 segundo
+
+}
+
+void loop() {
+
+  if (Serial.available()) { // verifica se ha dados na porta serial nativa
+    String texto = "";
+    String data = Serial.readStringUntil('\n'); //le e armazena os caracteres na serial nativa até que se encontre um caracter de quebra de linha '\n'
+
+    if (data.indexOf("*") > -1) { //verifica se a Sring contem um '*', isso indica que o valor recebido se trata do valor do nivel do sensor
+       data.replace("*", ""); //retira o '*' da string, util tanto para não mostrar o *, como se precisar converter o valor em string para integer.
+      texto = "Nivel: " + data + "%"; //concatena o texto usando o recurso de "+" para strings.
+    } else if (data.indexOf("#") > -1) { //verifica se a Sring contem um '#', isso indica que o valor recebido se trata do valor da potencia da bomba
+      data.replace("#", ""); //retira o '#' da string, util tanto para não mostrar o *, como se precisar converter o valor em string para integer.
+      texto = "Potencia: " + data + "%"; //concatena o texto usando o recurso de "+" para strings.
+    }
+
+
+    master.println(texto); //imprime o conteudo da variavel texto na serial virtual
+  }
+
+
+
+
+}
